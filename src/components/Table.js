@@ -4,6 +4,8 @@ import DataFetchAPI from '../services/DataFetchAPI';
 export default function Table() {
   const [planets, setPlanets] = useState([]);
   const [tableHeads, setTableHeads] = useState([]);
+  const [find, setFind] = useState('');
+  const [filters, setFilters] = useState([]);
 
   useEffect(() => {
     const fetching = async () => {
@@ -16,9 +18,31 @@ export default function Table() {
     fetching();
   }, []);
 
+  const filterName = planets.filter((e) => e.name.includes(find));
+  const planetsFilter = filterName.filter((e) => {
+    if (filters.length === 0) {
+      return true;
+    }
+    setFilters(e);
+    return null;
+  });
+
   return (
     <div>
-
+      <div>
+        <label
+          htmlFor="search"
+        >
+          <input
+            data-testid="name-filter"
+            name="name-filter"
+            type="text"
+            placeholder="Escreve aqui o nome"
+            value={ find }
+            onChange={ (e) => setFind(e.target.value) }
+          />
+        </label>
+      </div>
       <table>
         <thead>
           <tr>
@@ -28,7 +52,7 @@ export default function Table() {
           </tr>
         </thead>
         <tbody>
-          {planets.map((planet) => (
+          {planetsFilter.map((planet) => (
             <tr key={ planet.name }>
               <td>{planet.name}</td>
               <td>{planet.rotation_period}</td>
