@@ -10,6 +10,12 @@ export default function Table() {
   const [handle, setHandle] = useState('maior que');
   const [valor, setValor] = useState(0);
   const [numeroFiltro, setNumeroFiltro] = useState(null);
+  // const orbitalPeriod = 'orbital_periodableHeads, setTableHeads] = useState([]);
+  // const [find, setFind] = useState('');
+  // const [filters, setFilters] = useState([]);
+  // const [colunas, setC
+  const [opcao, setOpcao] = useState(['population', 'orbital_period', 'diameter',
+    'rotation_period', 'surface_water']);
 
   useEffect(() => {
     const fetching = async () => {
@@ -34,19 +40,42 @@ export default function Table() {
   const handleConditioning = (element) => {
     switch (element) {
     case 'maior que':
-      setNumeroFiltro(planetsFilter
-        .filter((elemento) => (+elemento[colunas] > +valor)));
+      // setNumeroFiltro(planetsFilter
+      //   .filter((elemento) => (+elemento[colunas] > +valor)));
+      if (numeroFiltro === null) {
+        setNumeroFiltro(planetsFilter
+          .filter((elementos) => +elementos[colunas] > +valor));
+      } else {
+        setNumeroFiltro(numeroFiltro
+          .filter((elementos) => +elementos[colunas] > +valor));
+      }
       break;
     case 'menor que':
-      setNumeroFiltro(planetsFilter
-        .filter((elemento) => (+elemento[colunas] < +valor)));
+      // setNumeroFiltro(planetsFilter
+      //   .filter((elemento) => (+elemento[colunas] < +valor)));
+      if (numeroFiltro === null) {
+        setNumeroFiltro(planetsFilter
+          .filter((elementos) => +elementos[colunas] < +valor));
+      } else {
+        setNumeroFiltro(numeroFiltro
+          .filter((elementos) => +elementos[colunas] < +valor));
+      }
       break;
     case 'igual a':
-      setNumeroFiltro(planetsFilter
-        .filter((elemento) => (+elemento[colunas] === +valor)));
+      // setNumeroFiltro(planetsFilter
+      //   .filter((elemento) => (+elemento[colunas] === +valor)));
+      if (numeroFiltro === null) {
+        setNumeroFiltro(planetsFilter
+          .filter((elementos) => +elementos[colunas] === +valor));
+      } else {
+        setNumeroFiltro(numeroFiltro
+          .filter((elementos) => +elementos[colunas] === +valor));
+      }
       break;
     default:
     }
+    setOpcao(opcao.filter((elementos) => elementos !== colunas));
+    setColunas('population');
   };
 
   return (
@@ -70,11 +99,16 @@ export default function Table() {
         value={ colunas }
         onChange={ ({ target: { value } }) => setColunas(value) }
       >
-        <option>population</option>
+        {/* <option>population</option>
         <option>orbital_period</option>
         <option>diameter</option>
         <option>rotation_period</option>
-        <option>surface_water</option>
+        <option>surface_water</option> */}
+        {opcao.length > 0
+        && opcao
+          .map((elementos) => (
+            <option key={ elementos } value={ elementos }>{elementos}</option>
+          ))}
       </select>
       <select
         data-testid="comparison-filter"
