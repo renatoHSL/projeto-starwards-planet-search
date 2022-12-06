@@ -2,48 +2,51 @@ import { useEffect, useState } from 'react';
 import DataFetchAPI from '../services/DataFetchAPI';
 
 export default function Table() {
-  const [planets, setPlanets] = useState([]);
+  const [arrumar, setArrumar] = useState('');
+  const [fato, setFato] = useState(0);
+  const [conjunto, setConjunto] = useState([]);
+  // const [filterRight, setFilterRight] = useState([]); // setPlanets
+  const [start, setStart] = useState('population');
+  const [planets, setPlanets] = useState([]); // setFilterRight
   const [tableHeads, setTableHeads] = useState([]);
-  const [find, setFind] = useState('');
-  const [filters, setFilters] = useState([]);
+  // const [find, setFind] = useState('');
+  const [data, setData] = useState([]);
+  // const [filters, setFilters] = useState([]);
   const [colunas, setColunas] = useState('population');
   const [handle, setHandle] = useState('maior que');
   const [valor, setValor] = useState(0);
   const [numeroFiltro, setNumeroFiltro] = useState(null);
-  // const orbitalPeriod = 'orbital_periodableHeads, setTableHeads] = useState([]);
-  // const [find, setFind] = useState('');
-  // const [filters, setFilters] = useState([]);
-  // const [colunas, setC
-  const [opcao, setOpcao] = useState(['population', 'orbital_period', 'diameter',
-    'rotation_period', 'surface_water']);
+  const [opcao, setOpcao] = useState(['surface_water', 'diameter', 'orbital_period',
+    'rotation_period', 'population']);
 
   useEffect(() => {
     const fetching = async () => {
       const tablePlanets = await DataFetchAPI();
       setPlanets(tablePlanets);
+      setData(tablePlanets);
       const heads = Object.keys(tablePlanets[0]).filter((e) => e !== 'residents');
       setTableHeads(heads);
     };
 
     fetching();
   }, []);
+  // const filterName = planets.filter((e) => e.name.includes(e.value));
+  const filterName = ({ target: { value } }) => setPlanets(data
+    .filter(({ name }) => name.includes(value)));
 
-  const filterName = planets.filter((e) => e.name.includes(find));
-  const planetsFilter = filterName.filter((e) => {
-    if (filters.length === 0) {
-      return true;
-    }
-    setFilters(e);
-    return null;
-  });
+  // const planetsFilter = filterName.filter((e) => {
+  //   if (filters.length === 0) {
+  //     return true;
+  //   }
+  //   setFilters(e);
+  //   return null;
+  // });
 
   const handleConditioning = (element) => {
     switch (element) {
     case 'maior que':
-      // setNumeroFiltro(planetsFilter
-      //   .filter((elemento) => (+elemento[colunas] > +valor)));
       if (numeroFiltro === null) {
-        setNumeroFiltro(planetsFilter
+        setNumeroFiltro(planets
           .filter((elementos) => +elementos[colunas] > +valor));
       } else {
         setNumeroFiltro(numeroFiltro
@@ -51,10 +54,8 @@ export default function Table() {
       }
       break;
     case 'menor que':
-      // setNumeroFiltro(planetsFilter
-      //   .filter((elemento) => (+elemento[colunas] < +valor)));
       if (numeroFiltro === null) {
-        setNumeroFiltro(planetsFilter
+        setNumeroFiltro(planets
           .filter((elementos) => +elementos[colunas] < +valor));
       } else {
         setNumeroFiltro(numeroFiltro
@@ -62,10 +63,8 @@ export default function Table() {
       }
       break;
     case 'igual a':
-      // setNumeroFiltro(planetsFilter
-      //   .filter((elemento) => (+elemento[colunas] === +valor)));
       if (numeroFiltro === null) {
-        setNumeroFiltro(planetsFilter
+        setNumeroFiltro(planets
           .filter((elementos) => +elementos[colunas] === +valor));
       } else {
         setNumeroFiltro(numeroFiltro
@@ -78,6 +77,41 @@ export default function Table() {
     setColunas('population');
   };
 
+  const typeStyleUnion = (element) => {
+    if (numeroFiltro === null) {
+      return setPlanets(element);
+    }
+    return setNumeroFiltro(element);
+  };
+  const conjuntoTipo = () => {
+    let base = [];
+    if (numeroFiltro === null) {
+      base = planets;
+      return base;
+    }
+    base = numeroFiltro;
+    return base;
+  };
+  const ordemMaior = () => {
+    const Piece = -1;
+    if (arrumar === 'CRESCENTE') {
+      return setConjunto(conjuntoTipo().sort((alfa, omega) => {
+        if (omega[start] === 'unknown') return Piece;
+
+        return +alfa[start] - +omega[start];
+      }));
+    }
+    if (arrumar === 'DECRESCENTE') {
+      return setConjunto(conjuntoTipo().sort((alfa, omega) => {
+        if (omega[start] === 'unknown') return Piece;
+        return +omega[start] - +alfa[start];
+      }));
+    }
+  };
+  useEffect(() => {
+    typeStyleUnion(conjunto);
+  }, [fato]);
+
   return (
     <div>
       <div>
@@ -89,8 +123,7 @@ export default function Table() {
             name="name-filter"
             type="text"
             placeholder="Escreve aqui o nome"
-            value={ find }
-            onChange={ (e) => setFind(e.target.value) }
+            onChange={ filterName }
           />
         </label>
       </div>
@@ -99,16 +132,9 @@ export default function Table() {
         value={ colunas }
         onChange={ ({ target: { value } }) => setColunas(value) }
       >
-        {/* <option>population</option>
-        <option>orbital_period</option>
-        <option>diameter</option>
-        <option>rotation_period</option>
-        <option>surface_water</option> */}
-        {opcao.length > 0
-        && opcao
-          .map((elementos) => (
-            <option key={ elementos } value={ elementos }>{elementos}</option>
-          ))}
+        {opcao.length > 0 && opcao.map((elementos) => (
+          <option key={ elementos } value={ elementos }>{elementos}</option>
+        ))}
       </select>
       <select
         data-testid="comparison-filter"
@@ -132,6 +158,47 @@ export default function Table() {
       >
         Filtrar
       </button>
+
+      <select
+        name="column-sort"
+        data-testid="column-sort"
+        onChange={ ({ target: { value } }) => setStart(value) }
+      >
+        <option value="population">population</option>
+        <option value="rotation_period">rotation_period</option>
+        <option value="orbital_period">orbital_period</option>
+        <option value="surface_water">surface_water</option>
+        <option value="diameter">diameter</option>
+      </select>
+      Crescente
+      <input
+        type="radio"
+        value="CRESCENTE"
+        data-testid="column-sort-input-asc"
+        name="sort"
+        onChange={ ({ target: { value } }) => setArrumar(value) }
+      />
+      Decrescente
+      <input
+        type="radio"
+        value="DECRESCENTE"
+        data-testid="column-sort-input-desc"
+        name="sort"
+        onChange={ ({ target: { value } }) => setArrumar(value) }
+      />
+      <button
+        type="button"
+        data-testid="column-sort-button"
+        onClick={ () => {
+          ordemMaior();
+          const Muitos = 500;
+          setTimeout(() => {
+            setFato(fato + 1);
+          }, Muitos);
+        } }
+      >
+        Agrupar
+      </button>
       <table>
         <thead>
           <tr>
@@ -141,27 +208,10 @@ export default function Table() {
           </tr>
         </thead>
         <tbody>
-          {/* {planetsFilter.map((planet) => (
-            <tr key={ planet.name }>
-              <td>{planet.name}</td>
-              <td>{planet.rotation_period}</td>
-              <td>{planet.orbital_period}</td>
-              <td>{planet.diameter}</td>
-              <td>{planet.climate}</td>
-              <td>{planet.gravity}</td>
-              <td>{planet.terrain}</td>
-              <td>{planet.surface_water}</td>
-              <td>{planet.population}</td>
-              <td>{planet.films}</td>
-              <td>{planet.created}</td>
-              <td>{planet.edited}</td>
-              <td>{planet.url}</td>
-            </tr>
-          ))} */}
-          {planetsFilter.length > 0 && numeroFiltro === null
-           && planetsFilter.map((planet) => (
+          {data.length > 0 && numeroFiltro === null
+           && planets.map((planet) => (
              <tr key={ planet.name }>
-               <td>{planet.name}</td>
+               <td data-testid="planet-name">{planet.name}</td>
                <td>{planet.rotation_period}</td>
                <td>{planet.orbital_period}</td>
                <td>{planet.diameter}</td>
@@ -178,7 +228,7 @@ export default function Table() {
            ))}
           {numeroFiltro !== null && numeroFiltro.map((planetInfo) => (
             <tr key={ planetInfo.name }>
-              <td>{planetInfo.name}</td>
+              <td data-testid="planet-name">{planetInfo.name}</td>
               <td>{planetInfo.rotation_period}</td>
               <td>{planetInfo.orbital_period}</td>
               <td>{planetInfo.diameter}</td>
